@@ -1,4 +1,5 @@
-import { isPlainObject } from './util'
+import { isPlainObject, deepMerge } from './util'
+import { Method } from '../types'
 
 function normalizeHeaderName(headers: any, normalizedName: string): void {
   if (!headers) {
@@ -6,7 +7,7 @@ function normalizeHeaderName(headers: any, normalizedName: string): void {
   }
   // 序列化headers属性
   Object.keys(headers).forEach(name => {
-    if (name !== normalizedName && name.toUpperCase() !== normalizedName.toUpperCase()) {
+    if (name !== normalizedName && name.toUpperCase() === normalizedName.toUpperCase()) {
       headers[normalizedName] = headers[name]
       delete headers[name]
     }
@@ -44,4 +45,32 @@ export function parseHeaders(headers: string): any {
     parsed[key] = val
   })
   return parsed
+}
+
+// 经过合并默认配置对象后，有些首部可能变成了这样
+// headers: {
+//   common: {
+//     Accept: 'application/json, text/plain, */*'
+//   },
+//   post: {
+//     'Content-Type':'application/x-www-form-urlencoded'
+//   }
+// }
+// 需要将其变为一级
+// headers: {
+//   Accept: 'application/json, text/plain, */*',
+//  'Content-Type':'application/x-www-form-urlencoded'
+// }
+// 但是也需要对应得method
+
+export function flattenHeaders(headers: any, method: Method): any {
+  if (!headers) {
+    return headers
+  }
+  headers = deepMerge(headers.common || {}, headers[method] || {}, headers)
+  const methodsToDelete = ['delete', 'get', 'head', 'options', 'post', 'put', 'patch', 'common']
+  methodsToDelete.forEach(method => {
+    delete headers[method]
+  })
+  return headers
 }
