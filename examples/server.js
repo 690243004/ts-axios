@@ -4,7 +4,9 @@ const webpack = require('webpack')
 const webpackDevMiddleware = require('webpack-dev-middleware')
 const webpackHotMiddleware = require('webpack-hot-middleware')
 const WebpackConfig = require('./webpack.config')
+const path = require('path')
 
+const multipart = require('connect-multiparty')
 const app = express()
 const compiler = webpack(WebpackConfig)
 
@@ -18,6 +20,20 @@ app.use(
   })
 )
 
+app.use(
+  express.static(__dirname, {
+    setHeaders(res) {
+      res.cookie('XSRF-TOKEN-D', '1234abc')
+    }
+  })
+)
+
+app.use(
+  multipart({
+    uploadDir: path.resolve(__dirname, 'upload-file')
+  })
+)
+
 app.use(webpackHotMiddleware(compiler))
 
 app.use(express.static(__dirname))
@@ -26,6 +42,11 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
 const router = express.Router()
+
+router.post('/more/upload', function(req, res) {
+  console.log(req.body, req.files)
+  res.end('upload success!')
+})
 
 router.get('/simple/get', function(req, res) {
   res.json({
@@ -71,6 +92,18 @@ router.get('/error/timeout', function(req, res) {
       msg: `hello world`
     })
   }, 3000)
+})
+
+router.get('/cancel/get', function(req, res) {
+  setTimeout(() => {
+    res.json({
+      msg: `hello world`
+    })
+  }, 5000)
+})
+
+router.get('/more/get', function(req, res) {
+  res.json(req.query)
 })
 
 app.use(router)

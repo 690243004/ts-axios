@@ -30,7 +30,7 @@ export function deepMerge(...objs: any[]) {
           if (isPlainObject(result[key])) {
             result[key] = deepMerge(result[key], val)
           } else {
-            result[key] = val
+            result[key] = deepMerge({}, val)
           }
         } else {
           result[key] = val
@@ -39,4 +39,12 @@ export function deepMerge(...objs: any[]) {
     }
   })
   return result
+}
+
+export function isFormData(val: any): boolean {
+  return typeof val !== 'undefined' && val instanceof FormData
+}
+
+export function isURLSearchParams(val: any): val is URLSearchParams {
+  return typeof val !== 'undefined' && val instanceof URLSearchParams
 }

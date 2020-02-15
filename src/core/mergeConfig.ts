@@ -15,6 +15,11 @@ export default function mergeConfig(
   for (let key in config2) {
     mergeField(key)
   }
+  for (let key in config1) {
+    if (!config2[key]) {
+      mergeField(key)
+    }
+  }
   function mergeField(key: string): void {
     const strat = strats[key] || defaultStrat
     config[key] = strat(config1[key], config2![key])
@@ -52,7 +57,7 @@ function deepMergeStrat(val1: any, val2: any) {
 }
 
 // 对于 headers 这类的复杂对象属性，我们需要使用深拷贝的方式
-const stratKeysDeepMerge = ['headers']
+const stratKeysDeepMerge = ['headers', 'auth']
 
 stratKeysDeepMerge.forEach(key => {
   strats[key] = deepMergeStrat
