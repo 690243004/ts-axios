@@ -38,8 +38,8 @@ export type Method =
   | 'patch'
   | 'PATCH'
 
-export interface AxiosResponse {
-  data: any
+export interface AxiosResponse<T = any> {
+  data: T
   status: number
   statusText: string
   headers: any
@@ -56,7 +56,7 @@ export interface AxiosError extends Error {
 }
 
 // 使 axios 返回的promise.resolve 参数是一个 AxiosResponse对象
-export interface AxiosPromise extends Promise<AxiosResponse> {}
+export interface AxiosPromise<T = any> extends Promise<AxiosResponse<T>> {}
 
 // 扩展axios 对象
 // export interface Axios {
